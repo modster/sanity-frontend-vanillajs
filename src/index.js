@@ -1,10 +1,38 @@
 import "./styles.css";
 
-document.getElementById("app").innerHTML = `
-<h1>Hello Vanilla!</h1>
-<div>
-  We use the same configuration as Parcel to bundle this sandbox, you can find more
-  info about Parcel 
-  <a href="https://parceljs.org" target="_blank" rel="noopener noreferrer">here</a>.
-</div>
-`;
+// Select the DOM-element, so that you can replace it with content
+let PROJECT_ID = "i7mau01w";
+let DATASET = "production";
+let QUERY = encodeURIComponent('*[_type == "pet"]');
+
+// Compose the URL for your project's endpoint and add the query
+let PROJECT_URL = `https://${PROJECT_ID}.api.sanity.io/v2021-10-21/data/query/${DATASET}?query=${QUERY}`;
+
+// fetch the content
+fetch(PROJECT_URL)
+  .then((res) => res.json())
+  .then(({ result }) => {
+    // get the list element, and the first item
+    let list = document.querySelector("ul");
+    let firstListItem = document.querySelector("ul li");
+
+    if (result.length > 0) {
+      // remove the placeholder content
+      list.removeChild(firstListItem);
+
+      result.forEach((pet) => {
+        // create a list element for each pet
+        let listItem = document.createElement("li");
+
+        // add the pet name as the text content
+        listItem.textContent = pet?.name;
+
+        // add the item to the list
+        list.appendChild(listItem);
+      });
+      let pre = document.querySelector("pre");
+      // add the raw data to the preformatted element
+      pre.textContent = JSON.stringify(result, null, 2);
+    }
+  })
+  .catch((err) => console.error(err));
